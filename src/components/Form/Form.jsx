@@ -1,6 +1,7 @@
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
 import { StyledError, StyledForm } from './Form.styled';
+import PropTypes from 'prop-types'; // ES6
 
 const schema = yup.object().shape({
   name: yup
@@ -25,18 +26,12 @@ export const PhonebookForm = ({ addNewContact }) => {
     number: '',
   };
 
-  const handleSubmit = (values, actions) => {
-    addNewContact(values);
-
-    actions.resetForm();
-  };
-
   return (
     <StyledForm>
       <h2>Phonebook</h2>
       <Formik
         initialValues={initialValues}
-        onSubmit={handleSubmit}
+        onSubmit={addNewContact}
         validationSchema={schema}
       >
         <Form>
@@ -57,4 +52,8 @@ export const PhonebookForm = ({ addNewContact }) => {
       </Formik>
     </StyledForm>
   );
+};
+
+PhonebookForm.propTypes = {
+  addNewContact: PropTypes.func.isRequired,
 };

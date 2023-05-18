@@ -15,10 +15,21 @@ export class App extends Component {
     filter: '',
   };
 
-  addNewContact = contactInfo => {
+  addNewContact = (values, actions) => {
+    const contactExists = this.state.contacts.some(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
+    if (contactExists) {
+      alert(`${values.name} is already in contacts.`);
+      return;
+    }
+
     this.setState(prevState => ({
-      contacts: [...prevState.contacts, { ...contactInfo, id: nanoid() }],
+      contacts: [...prevState.contacts, { ...values, id: nanoid() }],
     }));
+
+    actions.resetForm();
   };
 
   deleteSavedContact = id => {
@@ -38,7 +49,10 @@ export class App extends Component {
 
     return (
       <GlobalStyles>
-        <PhonebookForm addNewContact={this.addNewContact} />
+        <PhonebookForm
+          addNewContact={this.addNewContact}
+          contacts={this.state.contacts}
+        />
         <ContactList
           contacts={filteredContacts}
           updateFilter={this.updateFilter}
