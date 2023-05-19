@@ -4,6 +4,8 @@ import { Component } from 'react';
 import { GlobalStyles } from './App.styled';
 import { nanoid } from 'nanoid';
 
+console.log('need recommit');
+
 export class App extends Component {
   state = {
     contacts: [
