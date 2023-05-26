@@ -1,73 +1,103 @@
-import { ContactList } from 'components/ContactList/ContactList';
-import { PhonebookForm } from 'components/Form/Form';
-import { Component } from 'react';
-import { GlobalStyles } from './App.styled';
+import { useEffect, useReducer } from 'react';
 import { nanoid } from 'nanoid';
 
-export class App extends Component {
-  state = {
+import { ContactList } from 'components/ContactList/ContactList';
+import { PhonebookForm } from 'components/Form/Form';
+import { GlobalStyles } from './App.styled';
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_CONTACT':
+      const contactExists = state.contacts.some(
+        contact =>
+          contact.name.toLowerCase() === action.payload.name.toLowerCase()
+      );
+
+      if (contactExists) {
+        alert(`${action.payload.name} is already in contacts.`);
+        console.log('alert trigger');
+        return state;
+      }
+
+      return {
+        ...state,
+        contacts: [...state.contacts, { ...action.payload, id: nanoid() }],
+      };
+
+    case 'DELETE_CONTACT':
+      return {
+        ...state,
+        contacts: state.contacts.filter(
+          contact => contact.id !== action.payload
+        ),
+      };
+
+    case 'UPDATE_FILTER':
+      return {
+        ...state,
+        filter: action.payload,
+      };
+
+    case 'SET_CONTACTS':
+      return {
+        ...state,
+        contacts: action.payload,
+      };
+
+    default:
+      return state;
+  }
+};
+
+export const App = () => {
+  // тут в принципе редюсер не нужен, но я хотел пощупать его
+  const [state, dispatch] = useReducer(reducer, {
     contacts: [],
     filter: '',
-  };
+  });
 
-  addNewContact = (values, actions) => {
-    const contactExists = this.state.contacts.some(
-      contact => contact.name.toLowerCase() === values.name.toLowerCase()
-    );
+  const { contacts, filter } = state;
 
-    if (contactExists) {
-      alert(`${values.name} is already in contacts.`);
-      return;
+  useEffect(() => {
+    console.log('1');
+    const storedContacts = JSON.parse(localStorage.getItem('contacts'));
+
+    if (storedContacts) {
+      dispatch({ type: 'SET_CONTACTS', payload: storedContacts });
     }
+  }, []);
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, { ...values, id: nanoid() }],
-    }));
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
+  const addNewContact = (values, actions) => {
+    dispatch({ type: 'ADD_CONTACT', payload: values });
     actions.resetForm();
   };
 
-  deleteSavedContact = id => {
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts.filter(contact => contact.id !== id)],
-    }));
+  const deleteSavedContact = id => {
+    dispatch({ type: 'DELETE_CONTACT', payload: id });
   };
 
-  updateFilter = event => {
-    this.setState({ filter: event.target.value });
+  const updateFilter = event => {
+    dispatch({ type: 'UPDATE_FILTER', payload: event.target.value });
   };
 
-  componentDidMount() {
-    const contacts = JSON.parse(localStorage.getItem('contacts'));
-
-    if (contacts) {
-      this.setState({ contacts: contacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  render() {
-    const filteredContacts = this.state.contacts.filter(contact =>
-      contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
+  const filterContacts = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
     );
+  };
 
-    return (
-      <GlobalStyles>
-        <PhonebookForm
-          addNewContact={this.addNewContact}
-          contacts={this.state.contacts}
-        />
-        <ContactList
-          contacts={filteredContacts}
-          updateFilter={this.updateFilter}
-          deleteSavedContact={this.deleteSavedContact}
-        />
-      </GlobalStyles>
-    );
-  }
-}
+  return (
+    <GlobalStyles>
+      <PhonebookForm addNewContact={addNewContact} contacts={contacts} />
+      <ContactList
+        contacts={filterContacts()}
+        updateFilter={updateFilter}
+        deleteSavedContact={deleteSavedContact}
+      />
+    </GlobalStyles>
+  );
+};
