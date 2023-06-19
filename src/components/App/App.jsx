@@ -1,24 +1,15 @@
 import { useEffect, useReducer } from 'react';
 import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { ContactList } from 'components/ContactList/ContactList';
 import { PhonebookForm } from 'components/Form/Form';
 import { GlobalStyles } from './App.styled';
+import { addContact, deleteContact, updateFilter } from 'store/contactsReducer';
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'ADD_CONTACT':
-      const contactExists = state.contacts.some(
-        contact =>
-          contact.name.toLowerCase() === action.payload.name.toLowerCase()
-      );
-
-      if (contactExists) {
-        alert(`${action.payload.name} is already in contacts.`);
-        console.log('alert trigger');
-        return state;
-      }
-
       return {
         ...state,
         contacts: [...state.contacts, { ...action.payload, id: nanoid() }],
@@ -50,53 +41,62 @@ const reducer = (state, action) => {
 };
 
 export const App = () => {
-  // тут в принципе редюсер не нужен, но я хотел пощупать его
-  const [state, dispatch] = useReducer(reducer, {
-    contacts: [],
-    filter: '',
-  });
+  const dispatch = useDispatch();
 
-  const { contacts, filter } = state;
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.contacts.filter);
 
-  useEffect(() => {
-    console.log('1');
-    const storedContacts = JSON.parse(localStorage.getItem('contacts'));
+  console.log(contacts, filter);
 
-    if (storedContacts) {
-      dispatch({ type: 'SET_CONTACTS', payload: storedContacts });
+  // useEffect(() => {
+  //   console.log('1');
+  //   const storedContacts = JSON.parse(localStorage.getItem('contacts'));
+
+  //   if (storedContacts) {
+  //     dispatch({ type: 'SET_CONTACTS', payload: storedContacts });
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   localStorage.setItem('contacts', JSON.stringify(contacts));
+  // }, [contacts]);
+
+  const handleAddContact = (values, actions) => {
+    const contactExists = contacts.some(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
+    if (contactExists) {
+      alert(`${values.name} is already in contacts.`);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
+    dispatch(addContact({ ...values, id: nanoid() }));
 
-  const addNewContact = (values, actions) => {
-    dispatch({ type: 'ADD_CONTACT', payload: values });
     actions.resetForm();
   };
 
-  const deleteSavedContact = id => {
-    dispatch({ type: 'DELETE_CONTACT', payload: id });
+  const handleDeleteContact = id => {
+    dispatch(deleteContact(id));
   };
 
-  const updateFilter = event => {
-    dispatch({ type: 'UPDATE_FILTER', payload: event.target.value });
+  const handleUpdateFilter = event => {
+    dispatch(updateFilter(event.target.value));
   };
 
   const filterContacts = () => {
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
+    return [...contacts].filter(({ name }) =>
+      name.toLowerCase().includes(filter.toLowerCase())
     );
   };
 
   return (
     <GlobalStyles>
-      <PhonebookForm addNewContact={addNewContact} contacts={contacts} />
+      <PhonebookForm addNewContact={handleAddContact} contacts={contacts} />
       <ContactList
         contacts={filterContacts()}
-        updateFilter={updateFilter}
-        deleteSavedContact={deleteSavedContact}
+        updateFilter={handleUpdateFilter}
+        deleteSavedContact={handleDeleteContact}
       />
     </GlobalStyles>
   );
