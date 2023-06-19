@@ -37,13 +37,18 @@ export const PhonebookForm = ({ addNewContact }) => {
         <Form>
           <label htmlFor="name" className="form-label">
             Name
-            <Field type="text" name="name" placeholder="Alexandro" />
+            <Field type="text" id="name" name="name" placeholder="Alexandro" />
             <StyledError name="name" component="div" />
           </label>
 
           <label htmlFor="number" className="form-label">
             Number
-            <Field type="tel" name="number" placeholder="068-123-45-67" />
+            <Field
+              type="tel"
+              id="number"
+              name="number"
+              placeholder="068-123-45-67"
+            />
             <StyledError name="number" component="div" />
           </label>
 
