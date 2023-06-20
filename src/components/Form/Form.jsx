@@ -1,7 +1,9 @@
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
+import { useDispatch, useSelector } from 'react-redux';
+import { nanoid } from 'nanoid';
 import { StyledError, StyledForm } from './Form.styled';
-import PropTypes from 'prop-types'; // ES6
+import { addContact } from 'store/contactsReducer';
 
 const schema = yup.object().shape({
   name: yup
@@ -20,10 +22,28 @@ const schema = yup.object().shape({
     .required('Phone number is required'),
 });
 
-export const PhonebookForm = ({ addNewContact }) => {
-  const initialValues = {
-    name: '',
-    number: '',
+const initialValues = {
+  name: '',
+  number: '',
+};
+
+export const PhonebookForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.contacts);
+
+  const handleAddContact = (values, actions) => {
+    const contactExists = contacts.some(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
+    if (contactExists) {
+      alert(`${values.name} is already in contacts.`);
+      return;
+    }
+
+    dispatch(addContact({ ...values, id: nanoid() }));
+
+    actions.resetForm();
   };
 
   return (
@@ -31,7 +51,7 @@ export const PhonebookForm = ({ addNewContact }) => {
       <h2>Phonebook</h2>
       <Formik
         initialValues={initialValues}
-        onSubmit={addNewContact}
+        onSubmit={handleAddContact}
         validationSchema={schema}
       >
         <Form>
@@ -57,8 +77,4 @@ export const PhonebookForm = ({ addNewContact }) => {
       </Formik>
     </StyledForm>
   );
-};
-
-PhonebookForm.propTypes = {
-  addNewContact: PropTypes.func.isRequired,
 };
