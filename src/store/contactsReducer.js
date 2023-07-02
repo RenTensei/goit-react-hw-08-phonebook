@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
-import { persistReducer } from 'redux-persist';
-
 const initialState = {
-  contacts: [],
+  contacts: {
+    items: [],
+    isLoading: false,
+    error: null,
+  },
   filter: '',
 };
 
@@ -13,10 +14,10 @@ const contactsSlice = createSlice({
   initialState,
   reducers: {
     addContact(state, action) {
-      state.contacts.push(action.payload);
+      state.contacts.items.push(action.payload);
     },
     deleteContact(state, action) {
-      state.contacts = state.contacts.filter(
+      state.contacts.items = state.contacts.items.filter(
         contact => contact.id !== action.payload
       );
     },
@@ -26,19 +27,6 @@ const contactsSlice = createSlice({
   },
 });
 
-// wrap with persist
-
-const persistConfig = {
-  key: 'root',
-  storage,
-  whitelist: ['contacts'],
-};
-
-const persistedContactsReducer = persistReducer(
-  persistConfig,
-  contactsSlice.reducer
-);
-
 export const { addContact, deleteContact, updateFilter } =
   contactsSlice.actions;
-export default persistedContactsReducer;
+export default contactsSlice.reducer;
