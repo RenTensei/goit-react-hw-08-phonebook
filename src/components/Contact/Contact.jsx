@@ -17,7 +17,7 @@ export function Contact({ contact: { id, name, number } }) {
   return (
     <li className="contact-item">
       {name}: {number}
-      <button onClick={handleDeleteContact}>
+      <button onClick={handleDeleteContact} disabled={isLoading}>
         {isLoading || !isUninitialized ? 'deleting...' : 'delete'}
       </button>
     </li>
