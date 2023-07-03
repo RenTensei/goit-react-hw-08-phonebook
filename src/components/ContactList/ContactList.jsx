@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { updateFilter } from 'store/contactsReducer';
-import { useGetContactsQuery } from 'store/contactsApi';
-import { Contact } from 'components/Contact/Contact';
 import { ColorRing } from 'react-loader-spinner';
+import { updateFilter } from 'store/slices/contactsReducer';
+import { useGetContactsQuery } from 'store/slices/contactsApi';
+import { Contact } from 'components/Contact/Contact';
 
 export const ContactList = () => {
   const dispatch = useDispatch();

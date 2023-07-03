@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import contactsReducer from './contactsReducer';
-import { contactsApi } from './contactsApi';
+import contactsReducer from './slices/contactsReducer';
+import { contactsApi } from './slices/contactsApi';
 
 export const store = configureStore({
   reducer: {

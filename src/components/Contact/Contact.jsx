@@ -1,8 +1,8 @@
-import { useDeleteContactMutation } from 'store/contactsApi';
 import { toast } from 'react-toastify';
+import { useDeleteContactMutation } from 'store/slices/contactsApi';
 
 export function Contact({ contact: { id, name, number } }) {
-  const [deleteContact, { isLoading, isUninitialized, isSuccess }] =
+  const [deleteContact, { isLoading, isUninitialized }] =
     useDeleteContactMutation();
 
   const handleDeleteContact = async () => {

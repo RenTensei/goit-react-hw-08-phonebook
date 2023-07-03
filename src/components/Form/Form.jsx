@@ -1,8 +1,11 @@
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
-import { StyledError, StyledForm } from './Form.styled';
-import { useAddContactMutation, useGetContactsQuery } from 'store/contactsApi';
 import { toast } from 'react-toastify';
+import { StyledError, StyledForm } from './Form.styled';
+import {
+  useAddContactMutation,
+  useGetContactsQuery,
+} from 'store/slices/contactsApi';
 
 const schema = yup.object().shape({
   name: yup
