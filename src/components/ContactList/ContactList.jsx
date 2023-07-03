@@ -1,38 +1,36 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact, updateFilter } from 'store/contactsReducer';
+import { updateFilter } from 'store/contactsReducer';
+import { useGetContactsQuery } from 'store/contactsApi';
+import { Contact } from 'components/Contact/Contact';
+import { ColorRing } from 'react-loader-spinner';
 
 export const ContactList = () => {
   const dispatch = useDispatch();
 
-  const contacts = useSelector(state => state.contacts.contacts);
+  const { data: contacts, isLoading, error } = useGetContactsQuery();
+
   const filter = useSelector(state => state.contacts.filter);
 
-  const handleDeleteContact = id => {
-    dispatch(deleteContact(id));
-  };
-
-  const handleUpdateFilter = event => {
-    dispatch(updateFilter(event.target.value));
-  };
-
   const filteredContacts = () => {
-    return [...contacts].filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
-    );
+    return contacts
+      ? [...contacts].filter(({ name }) =>
+          name.toLowerCase().includes(filter.toLowerCase())
+        )
+      : [];
   };
 
   return (
     <div>
       <h2>Contacts</h2>
       <p>Find contacts by name</p>
-      <input onChange={handleUpdateFilter}></input>
+      <input onChange={event => dispatch(updateFilter(event.target.value))} />
       <ul>
-        {filteredContacts().map(({ name, number, id }) => (
-          <li key={id} className="contact-item">
-            {name}: {number}
-            <button onClick={() => handleDeleteContact(id)}>delete</button>
-          </li>
-        ))}
+        {isLoading && <ColorRing />}
+        {!isLoading &&
+          !error &&
+          filteredContacts().map(contactData => (
+            <Contact key={contactData.id} contact={contactData} />
+          ))}
       </ul>
     </div>
   );

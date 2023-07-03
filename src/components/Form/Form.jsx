@@ -1,9 +1,8 @@
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
-import { useDispatch, useSelector } from 'react-redux';
-import { nanoid } from 'nanoid';
 import { StyledError, StyledForm } from './Form.styled';
-import { addContact } from 'store/contactsReducer';
+import { useAddContactMutation, useGetContactsQuery } from 'store/contactsApi';
+import { toast } from 'react-toastify';
 
 const schema = yup.object().shape({
   name: yup
@@ -28,22 +27,27 @@ const initialValues = {
 };
 
 export const PhonebookForm = () => {
-  const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.contacts);
+  const [addContact] = useAddContactMutation();
+  const { data: contacts } = useGetContactsQuery();
 
-  const handleAddContact = (values, actions) => {
-    const contactExists = contacts.some(
-      contact => contact.name.toLowerCase() === values.name.toLowerCase()
-    );
+  const handleAddContact = async (values, actions) => {
+    try {
+      const contactExists = contacts.some(
+        contact => contact.name.toLowerCase() === values.name.toLowerCase()
+      );
 
-    if (contactExists) {
-      alert(`${values.name} is already in contacts.`);
-      return;
+      if (contactExists) {
+        toast.error(`${values.name} is already in contacts.`);
+        throw new Error('Contact already exists!');
+      }
+
+      await addContact(values);
+      toast.success(`${values.name} was added!`);
+    } catch (error) {
+      console.warn(error);
+    } finally {
+      actions.resetForm();
     }
-
-    dispatch(addContact({ ...values, id: nanoid() }));
-
-    actions.resetForm();
   };
 
   return (

@@ -9,14 +9,15 @@ export const GlobalStyles = styled.main`
     }
   }
   margin: 0 auto;
-  margin-top: 150px;
+  margin-top: 120px;
+  margin-bottom: 120px;
 
   background: #efeff5;
   border-radius: 16px;
 
   width: 440px;
   overflow: hidden;
-  padding: 48px;
+  padding: 40px;
   box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.1);
 
@@ -76,6 +77,10 @@ export const GlobalStyles = styled.main`
     align-items: center;
 
     margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     button {
       margin: 0;
