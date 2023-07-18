@@ -7,6 +7,7 @@ import {
   MenuItem,
   IconButton,
   Box,
+  Typography,
 } from '@mui/material';
 import { AppRoutes } from 'components/App/AppRoutes';
 import { useState } from 'react';
@@ -18,6 +19,7 @@ import { authSelectors } from 'slices/auth/selectors';
 export const Header = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(authSelectors.selectLoginStatus);
+  const { name } = useSelector(authSelectors.selectUser);
 
   // MUI Menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -48,46 +50,45 @@ export const Header = () => {
           )}
         </Box>
 
-        <div>
-          <IconButton size="large" onClick={handleMenu} color="secondary">
-            <AccountCircle />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            {!isLoggedIn && (
-              <MenuItem onClick={() => handleMenuNavigate(AppRoutes.REGISTER)}>
-                Register
-              </MenuItem>
-            )}
-            {!isLoggedIn && (
-              <MenuItem onClick={() => handleMenuNavigate(AppRoutes.LOGIN)}>
-                Login
-              </MenuItem>
-            )}
-            {isLoggedIn && (
-              <MenuItem
-                onClick={() => {
-                  dispatch(logOut());
-                  handleClose();
-                }}
-              >
-                Logout
-              </MenuItem>
-            )}
-          </Menu>
-        </div>
+        {name && <Typography variant="p">Welcome back, {name}</Typography>}
+        <IconButton size="large" onClick={handleMenu} color="secondary">
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          {!isLoggedIn && (
+            <MenuItem onClick={() => handleMenuNavigate(AppRoutes.REGISTER)}>
+              Register
+            </MenuItem>
+          )}
+          {!isLoggedIn && (
+            <MenuItem onClick={() => handleMenuNavigate(AppRoutes.LOGIN)}>
+              Login
+            </MenuItem>
+          )}
+          {isLoggedIn && (
+            <MenuItem
+              onClick={() => {
+                dispatch(logOut());
+                handleClose();
+              }}
+            >
+              Logout
+            </MenuItem>
+          )}
+        </Menu>
       </Toolbar>
     </AppBar>
   );
