@@ -1,8 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { ColorRing } from 'react-loader-spinner';
-import { updateFilter } from 'store/slices/contactsReducer';
-import { useGetContactsQuery } from 'store/slices/contactsApi';
+import { updateFilter } from 'slices/contactsReducer';
+import { useGetContactsQuery } from 'slices/contactsApi';
 import { Contact } from 'components/Contact/Contact';
+import { Stack, TextField, Typography } from '@mui/material';
 
 export const ContactList = () => {
   const dispatch = useDispatch();
@@ -20,18 +21,21 @@ export const ContactList = () => {
   };
 
   return (
-    <div>
-      <h2>Contacts</h2>
-      <p>Find contacts by name</p>
-      <input onChange={event => dispatch(updateFilter(event.target.value))} />
-      <ul>
-        {isLoading && <ColorRing />}
-        {!isLoading &&
-          !error &&
-          filteredContacts().map(contactData => (
-            <Contact key={contactData.id} contact={contactData} />
-          ))}
-      </ul>
-    </div>
+    <Stack spacing={2}>
+      <Typography variant="p">Find contacts by name:</Typography>
+
+      <TextField
+        placeholder="Filter..."
+        size="small"
+        onChange={event => dispatch(updateFilter(event.target.value))}
+      />
+
+      {isLoading && <ColorRing />}
+      {!isLoading &&
+        !error &&
+        filteredContacts().map(contactData => (
+          <Contact key={contactData.id} contact={contactData} />
+        ))}
+    </Stack>
   );
 };

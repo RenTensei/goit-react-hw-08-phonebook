@@ -1,11 +1,14 @@
-import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
-import { StyledError, StyledForm } from './Form.styled';
 import {
   useAddContactMutation,
   useGetContactsQuery,
-} from 'store/slices/contactsApi';
+  useUpdateContactMutation,
+} from 'slices/contactsApi';
+import { Button, Stack, TextField, Typography } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import { Controller, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const schema = yup.object().shape({
   name: yup
@@ -30,58 +33,95 @@ const initialValues = {
 };
 
 export const PhonebookForm = () => {
-  const [addContact] = useAddContactMutation();
   const { data: contacts } = useGetContactsQuery();
+  const [addContact] = useAddContactMutation();
+  const [updateContact] = useUpdateContactMutation();
 
-  const handleAddContact = async (values, actions) => {
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: initialValues,
+    resolver: yupResolver(schema),
+  });
+
+  const handleAddContact = async values => {
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === values.name.toLowerCase()
+    );
+
     try {
-      const contactExists = contacts.some(
-        contact => contact.name.toLowerCase() === values.name.toLowerCase()
-      );
+      if (existingContact) {
+        const { id } = existingContact;
 
-      if (contactExists) {
-        toast.error(`${values.name} is already in contacts.`);
-        throw new Error('Contact already exists!');
+        toast.warn(
+          `${values.name} is already in contacts, updating phone number...`
+        );
+
+        await updateContact({ id, data: values });
+        toast.success(`${values.name} phone was updated!`);
+        return;
       }
-
       await addContact(values);
       toast.success(`${values.name} was added!`);
     } catch (error) {
       console.warn(error);
     } finally {
-      actions.resetForm();
+      reset(initialValues);
     }
   };
 
   return (
-    <StyledForm>
-      <h2>Phonebook</h2>
-      <Formik
-        initialValues={initialValues}
-        onSubmit={handleAddContact}
-        validationSchema={schema}
-      >
-        <Form>
-          <label htmlFor="name" className="form-label">
-            Name
-            <Field type="text" id="name" name="name" placeholder="Alexandro" />
-            <StyledError name="name" component="div" />
-          </label>
+    <form onSubmit={handleSubmit(handleAddContact)}>
+      <Stack spacing={2}>
+        <Typography variant="p">Write down new contact's name:</Typography>
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="text"
+              id="name"
+              placeholder="Alexandro"
+              label="Name"
+              size="small"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+            />
+          )}
+        />
 
-          <label htmlFor="number" className="form-label">
-            Number
-            <Field
+        <Typography variant="p">Write down new contact's phone:</Typography>
+        <Controller
+          name="number"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
               type="tel"
               id="number"
-              name="number"
               placeholder="068-123-45-67"
+              label="Number"
+              size="small"
+              error={!!errors.number}
+              helperText={errors.number?.message}
             />
-            <StyledError name="number" component="div" />
-          </label>
+          )}
+        />
 
-          <button type="submit">add contact</button>
-        </Form>
-      </Formik>
-    </StyledForm>
+        <Button
+          type="submit"
+          size="large"
+          variant="text"
+          color="primary"
+          endIcon={<SendIcon />}
+        >
+          Add contact
+        </Button>
+      </Stack>
+    </form>
   );
 };

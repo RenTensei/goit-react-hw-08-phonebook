@@ -1,5 +1,7 @@
+import { Button, Paper, Typography } from '@mui/material';
 import { toast } from 'react-toastify';
-import { useDeleteContactMutation } from 'store/slices/contactsApi';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useDeleteContactMutation } from 'slices/contactsApi';
 
 export function Contact({ contact: { id, name, number } }) {
   const [deleteContact, { isLoading, isUninitialized }] =
@@ -15,11 +17,22 @@ export function Contact({ contact: { id, name, number } }) {
   };
 
   return (
-    <li className="contact-item">
-      {name}: {number}
-      <button onClick={handleDeleteContact} disabled={isLoading}>
+    <Paper
+      sx={{ padding: '12px 16px', display: 'flex', alignItems: 'center' }}
+      elevation={6}
+    >
+      <Typography variant="p" flexGrow={1}>
+        {name}: {number}
+      </Typography>
+      <Button
+        variant="contained"
+        color="error"
+        startIcon={<DeleteIcon />}
+        onClick={handleDeleteContact}
+        disabled={isLoading}
+      >
         {isLoading || !isUninitialized ? 'deleting...' : 'delete'}
-      </button>
-    </li>
+      </Button>
+    </Paper>
   );
 }
